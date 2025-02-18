@@ -18,7 +18,7 @@ KICK con solo canal	461	KICK :Not enough parameters - ok
 KICK con solo usuario (sin especificar canal)	461	KICK :Not enough parameters - ok
 KICK con canal inexistente	403	#general :No such channel - ok
 KICK con canal o usuario inexistente	441	JohnDoe #general :They aren't on that channel - ok
-KICK con canal y usuario, pero quien lo ejecuta no es operador	482	#general :You're not channel operator
+KICK con canal y usuario, pero quien lo ejecuta no es operador	482	#general :You're not channel operator - ok
 KICK con canal y usuario válido, ejecutado correctamente	No error	Usuario es expulsado y se notifica a todos en el canal
 
 */
@@ -84,7 +84,7 @@ int kickParsingIsCorrect(std::string &msg, Server* server, int fd)
 		server->sendResp(ERR_CHANOPRIVSNEEDED(cl->getNick(), chName), fd);//482
 		return (0);
 	}
-	
+
     return (1);
 }
 
