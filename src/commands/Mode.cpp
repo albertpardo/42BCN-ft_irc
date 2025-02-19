@@ -5,14 +5,77 @@ Mode::~Mode( void ) {};
 
 /* ------------------- PUBLIC MEMBER FUNCTIONS ------------------*/
 
+std::string Mode::modeOption_push(std::string optionChain, char sign, char option)
+{
+	std::stringstream ss;
+	ss.clear();
+	char last = '\0';
+	for (size_t i = 0; i < optionChain.size(); i++)
+	{
+		if (optionChain[i] == '+' || optionChain[i] == '-')
+			last = optionChain[i];
+	}
+	if (last != sign)
+		ss << sign << option;
+	else
+		ss << option;
+	return ss.str();
+}
+
 std::string Mode::inviteOnly_mode(Channel *ch, char sign, std::string optionChain)
 {
-	(void)ch;
-	(void)sign;
-	(void)optionChain;
-	std::string param;
-	return param;
+	std::string strOption;
+	strOption.clear();
+	if (sign == '+' && !ch->isInviteChannel() && !ch->getModeOption(0))
+	{
+		ch->setInviteChannel();
+		ch->setModeOption(0, true);
+		strOption = modeOption_push(optionChain, sign, 'i');
+	}
+	else if (sign == '-' && ch->isInviteChannel() && ch->getModeOption(0))
+	{
+		ch->unsetInviteChannel();
+		ch->setModeOption(0, false);
+		strOption = modeOption_push(optionChain, sign, 'i');
+	}	
+	return strOption;
 }
+
+std::string changeOperatorPrivilege(Server *server, Channel *ch, char sign, std::string nick)
+{
+	// (void)optionChain;
+
+	std::string strOption;
+	strOption.clear();
+	nick = uppercase(nick);//debug
+	if (sign == '+')
+	{
+		Client *client = server->getClientByNick(nick);//************************************************************segv */TO DEBUG
+		if (!client)
+		{
+    		std::cerr << "Error: Client with nick " << nick << " not found!" << std::endl;
+    		return "";
+		}
+		ch->addOpe(client);
+		std::cout << "PRIVILEGE ADDED" << std::endl;//debug
+		printChannelsInfo(server);//debug
+		//quitar desdd memClients
+		ch->deleteMem(nick);
+		std::cout << "MEMBER DELETED FROM CHANNEL" << std::endl;//debug
+		printChannelsInfo(server);//debug
+	}
+	else if (sign == '-')
+	{
+		ch->deleteOpe(nick);
+		std::cout << "PRIVILEGE DELETED" << std::endl;
+		printChannelsInfo(server);
+	}
+	else {
+		std::cout << "invalid sign!" << std::endl;
+	}
+	return (strOption);
+}
+
 
 void Mode::getModeArgs(std::string msg, std::string &channelName, std::string &option, std::string &param)
 {
@@ -24,16 +87,16 @@ void Mode::getModeArgs(std::string msg, std::string &channelName, std::string &o
 		param = msg.substr(pos);
 }
 
-void Mode::execute( Server* server, std::string &msg , int fd)
-{
-	/* // the following is the example of the format of channel mode command:
+/* // the following is the example of the format of channel mode command:
 	MODE #mychannel +i
-	MODE #mychannel +o Bob / MODE #mychannel -o Bob
+	MODE #mychannel(channelName) +o(option) Bob(param)
 	MODE #mychannel +k secret123
 	MODE #mychannel +l 25
 	mode #mychannel +t
 	MODE #mychannel -i
-	*/
+*/
+void Mode::execute( Server* server, std::string &msg , int fd)
+{
 	std::string 		channelName;
 	std::string 		option;
 	std::string 		param;
@@ -55,6 +118,7 @@ void Mode::execute( Server* server, std::string &msg , int fd)
 	}
 	else 
 		msg = msg.substr(1); // mychannel +i remove the first # or &
+	std::cout << "mode msg: " << msg << std::endl; //debug
 	getModeArgs(msg, channelName, option, param); // mychannel +i
 	Client *cl = server->getClient(fd);
 	std::string nick = cl->getNick();
@@ -93,7 +157,10 @@ void Mode::execute( Server* server, std::string &msg , int fd)
 		for (size_t i = 0; i < option.size(); i++)
 		{
 			if (option[i] == '+' || option[i] == '-')//*o
+			{
 				sign = option[i];
+				// std::cout << "sign: " << sign << std::endl;//debug
+			}
 			else
 			{
 				if (option[i] == 'i')
@@ -104,7 +171,7 @@ void Mode::execute( Server* server, std::string &msg , int fd)
 				{}
 				else if (option[i] == 'o')//WIP by castorga
 				{
-					std::cout << "option[i] aki voy!!!!!!!!!!!!!!!!!!!! = " << option[i] << std::endl;//debug
+					optionChain << changeOperatorPrivilege(server, channel, sign, param);
 				}
 				else if (option[i] == 'l')
 				{}
@@ -116,7 +183,7 @@ void Mode::execute( Server* server, std::string &msg , int fd)
 				}
 			}
 		}
-		std::string chain = optionChain.str();
+		std::string chain = optionChain.str(); //+i
 		if (chain.empty())
 			return ;
 		std::string chaMsg = formatIRCMessage(RPL_CHANGEMODE(server->getServerName(), channelName, chain, param));

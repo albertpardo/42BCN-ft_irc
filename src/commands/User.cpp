@@ -50,12 +50,13 @@ void User::execute(Server* server, std::string& msg, int fd)
             server->sendResp(ERR_NEEDMOREPARAMS(std::string("*"), "USER"), fd);  // 461
             return;
         }
+/*
         if (mode != "0" || unused != "*") {
                 server->sendResp(ERR_USERSYNTAXERROR(std::string("*"), "USER"), fd);
             return;
         }
-        realname.erase(std::remove(realname.begin(), realname.end(), '\r'), realname.end());
-        realname.erase(std::remove(realname.begin(), realname.end(), '\n'), realname.end());
+*/
+        realname = trimRight(realname);
         client->setUserName(username);
         client->setHasUser();
         std::cout << YEL << "Correct user format!" << RES << std::endl;  //debug

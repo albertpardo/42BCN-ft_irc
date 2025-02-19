@@ -13,6 +13,8 @@ class Mode : public ICommand
 		void execute( Server*, std::string &, int );
 		void getModeArgs(std::string msg, std::string &channelName, std::string &option, std::string &param);
 		std::string inviteOnly_mode(Channel *ch, char sign, std::string optionChain);
+		std::string modeOption_push(std::string optionChain, char sign, char option);
+		// std::string changeOperatorPrivilege(Server *server, Client *cl, Channel *ch, char sign, std::string optionChain, std::string nick);
 };
 
 #endif

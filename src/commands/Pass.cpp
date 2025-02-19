@@ -21,8 +21,6 @@ void Pass::execute(Server* server, std::string &msg, int fd)
         server->sendResp(ERR_ALREADYREGISTERED(std::string("*")), fd);  // 462
         return; 
     }
-    msg.erase(std::remove(msg.begin(), msg.end(), '\r'), msg.end());
-    msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
     msg = trimRight(msg);
     if (msg == server->getPassword()) {
         std::cout << YEL << "Correct password!" << RES << std::endl;
