@@ -100,7 +100,7 @@ Channel::~Channel( void )
 */
 	this->_memClients.clear();
 	this->_invClients.clear();
-	this->_operator.size();
+	this->_operator.clear();
 }
 
 /* ------------------- PUBLIC MEMBER FUNCTIONS ------------------*/
@@ -328,29 +328,31 @@ void	Channel::addMem(Client *client)
 	}
 }
 
-void	Channel::deleteMem(std::string &nick)
+void	Channel::deleteMem(std::string &nick)//uppercase
 {
 	if (!this->_deleteInMap(this->_memClients, nick))
 		std::cout << nick << " is NOT in _memClients map. CAN'T DELETE IT!!!" << std::endl;
 }
 
+std::string	Channel::getFirstMemNick( void ) { return (this->_memClients.begin()->first); }
+std::string Channel::getFirstOpeNick( void ) { return (this->_operator.begin()->first); }
 
-Client*	Channel::getFirstMem( void ) { return (this->_memClients.begin()->second); }
+Client*	Channel::getFirstMem( void ) { return (this->_memClients.begin()->second); } //Delete ???
 
-Client*	Channel::getFirstOpe( void ) { return (this->_operator.begin()->second); }  // For test 251213
+Client*	Channel::getFirstOpe( void ) { return (this->_operator.begin()->second); }  // For test 251213  Delete ??
 
 // Start  250215 by apardo-m
-
 
 std::vector<std::string>	Channel::getNicksInChannel( void )
 {
 	std::vector<std::string>	allNicks;
-//TODO
+
+	for (std::map<std::string, Client *>::iterator it = _operator.begin(); it != _operator.end(); it++)
+		allNicks.push_back(it->first);
+	for (std::map<std::string, Client *>::iterator it = _memClients.begin(); it != _memClients.end(); it++)
+		allNicks.push_back(it->first);
 	return (allNicks);
-
 }
-
-
 
 // Returns:
 // fd from client in position _operator[position]
@@ -366,7 +368,6 @@ int	Channel::getFdOperatorByPosInOperators(size_t pos)
 	{	
 		for (size_t i = 1; i <= pos; i++)
 			it++;
-
 		return ( it->second->getFdClient() );
 	}
 	std::cout << "!!!!!!NOT IN limits : Pos = " << pos << " , _operator.size()=" << _operator.size() << std::endl;
@@ -385,7 +386,6 @@ int	Channel::getFdMemberByPosInMemClients(size_t pos)
 	{
 		for (size_t i = 1; i <= pos; i++)
 			it++;
-
 		return ( it->second->getFdClient());
 	}
 	std::cout << "!!!!!!NOT IN limits : Pos = " << pos << " , _memClients.size()=" << _memClients.size() << std::endl;
@@ -456,7 +456,7 @@ void	Channel::printChannelVars( void )
 	std::cout << "- CHANNEL _operators:" << std::endl;
 	//this->_printVectorStrings(this->_operators);
 	this->_printMapKeys(this->_operator);
-	std::cout << "- CHANNEL _memberClients:" << std::endl;
+	std::cout << "- CHANNEL _memClients:" << std::endl;
 //	this->_printVectorStrings(this->_memberClients);
 	this->_printMapKeys(this->_memClients);
 	std::cout << "- CHANNEL _invitedClients:" << std::endl;
