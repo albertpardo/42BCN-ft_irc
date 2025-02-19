@@ -41,6 +41,28 @@ std::string Mode::inviteOnly_mode(Channel *ch, char sign, std::string optionChai
 	return strOption;
 }
 
+std::string changeOperatorPrivilege(Channel *ch, char sign, std::string optionChain)
+{
+	(void)ch;
+	(void)optionChain;
+	std::string strOption;
+	strOption.clear();
+	if (sign == '+')
+	{
+		ch->addOpe(nick);
+		// strOption = modeOption_push(optionChain, sign, 'o');
+	}
+	else if (sign == '-')
+	{
+		// ch->deleteOperator(nick);
+		// strOption = modeOption_push(optionChain, sign, 'o');
+	}
+	else {
+		std::cout << "invalid sign!" << std::endl;
+	}
+	return strOption;
+}
+
 void Mode::getModeArgs(std::string msg, std::string &channelName, std::string &option, std::string &param)
 {
 	std::istringstream ss(msg);
@@ -51,17 +73,16 @@ void Mode::getModeArgs(std::string msg, std::string &channelName, std::string &o
 		param = msg.substr(pos);
 }
 
-void Mode::execute( Server* server, std::string &msg , int fd)
-{
-	/* // the following is the example of the format of channel mode command:
+/* // the following is the example of the format of channel mode command:
 	MODE #mychannel +i
 	MODE #mychannel +o Bob / MODE #mychannel -o Bob
 	MODE #mychannel +k secret123
 	MODE #mychannel +l 25
 	mode #mychannel +t
 	MODE #mychannel -i
-
-	*/
+*/
+void Mode::execute( Server* server, std::string &msg , int fd)
+{
 	std::string 		channelName;
 	std::string 		option;
 	std::string 		param;
@@ -122,7 +143,10 @@ void Mode::execute( Server* server, std::string &msg , int fd)
 		for (size_t i = 0; i < option.size(); i++)
 		{
 			if (option[i] == '+' || option[i] == '-')//*o
+			{
 				sign = option[i];
+				// std::cout << "sign: " << sign << std::endl;//debug
+			}
 			else
 			{
 				if (option[i] == 'i')
@@ -133,7 +157,7 @@ void Mode::execute( Server* server, std::string &msg , int fd)
 				{}
 				else if (option[i] == 'o')//WIP by castorga
 				{
-					std::cout << "option[i] aki voy!!!!!!!!!!!!!!!!!!!! = " << option[i] << std::endl;//debug
+					optionChain << changeOperatorPrivilege(channel, sign, optionChain.str());//Como obtener el nick del usuario a cambiar?
 				}
 				else if (option[i] == 'l')
 				{}
