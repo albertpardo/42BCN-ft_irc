@@ -41,27 +41,41 @@ std::string Mode::inviteOnly_mode(Channel *ch, char sign, std::string optionChai
 	return strOption;
 }
 
-std::string changeOperatorPrivilege(Channel *ch, char sign, std::string optionChain)
+std::string changeOperatorPrivilege(Server *server, Channel *ch, char sign, std::string nick)
 {
-	(void)ch;
-	(void)optionChain;
+	// (void)optionChain;
+
 	std::string strOption;
 	strOption.clear();
+	nick = uppercase(nick);//debug
 	if (sign == '+')
 	{
-		ch->addOpe(nick);
-		// strOption = modeOption_push(optionChain, sign, 'o');
+		Client *client = server->getClientByNick(nick);//************************************************************segv */TO DEBUG
+		if (!client)
+		{
+    		std::cerr << "Error: Client with nick " << nick << " not found!" << std::endl;
+    		return "";
+		}
+		ch->addOpe(client);
+		std::cout << "PRIVILEGE ADDED" << std::endl;//debug
+		printChannelsInfo(server);//debug
+		//quitar desdd memClients
+		ch->deleteMem(nick);
+		std::cout << "MEMBER DELETED FROM CHANNEL" << std::endl;//debug
+		printChannelsInfo(server);//debug
 	}
 	else if (sign == '-')
 	{
-		// ch->deleteOperator(nick);
-		// strOption = modeOption_push(optionChain, sign, 'o');
+		ch->deleteOpe(nick);
+		std::cout << "PRIVILEGE DELETED" << std::endl;
+		printChannelsInfo(server);
 	}
 	else {
 		std::cout << "invalid sign!" << std::endl;
 	}
-	return strOption;
+	return (strOption);
 }
+
 
 void Mode::getModeArgs(std::string msg, std::string &channelName, std::string &option, std::string &param)
 {
@@ -75,7 +89,7 @@ void Mode::getModeArgs(std::string msg, std::string &channelName, std::string &o
 
 /* // the following is the example of the format of channel mode command:
 	MODE #mychannel +i
-	MODE #mychannel +o Bob / MODE #mychannel -o Bob
+	MODE #mychannel(channelName) +o(option) Bob(param)
 	MODE #mychannel +k secret123
 	MODE #mychannel +l 25
 	mode #mychannel +t
@@ -157,7 +171,7 @@ void Mode::execute( Server* server, std::string &msg , int fd)
 				{}
 				else if (option[i] == 'o')//WIP by castorga
 				{
-					optionChain << changeOperatorPrivilege(channel, sign, optionChain.str());//Como obtener el nick del usuario a cambiar?
+					optionChain << changeOperatorPrivilege(server, channel, sign, param);
 				}
 				else if (option[i] == 'l')
 				{}
