@@ -48,12 +48,26 @@ std::string changeOperatorPrivilege(Server *server, Channel *ch, char sign, std:
 	std::string strOption;
 	strOption.clear();
 	nick = uppercase(nick);//debug
+	std::cout << "--- changeOperatorPrivilege() - nick=" << nick << std::endl;
+	ch->printChannelVars();//debug:w
+	
 	if (sign == '+')
 	{
+		//chek if nick is in memClients
+		if (!ch->isMem(nick))
+		{
+			std::cout << "Error: Client with nick " << nick << " not found in channel!" << std::endl;
+			return "";
+		}
+		else
+		{
+			std::cout << "Is in channel!" << std::endl;
+		}
+		//
 		Client *client = server->getClientByNick(nick);//************************************************************segv */TO DEBUG
 		if (!client)
 		{
-    		std::cerr << "Error: Client with nick " << nick << " not found!" << std::endl;
+    		std::cout << "Error: Client with nick " << nick << " not found!" << std::endl;
     		return "";
 		}
 		ch->addOpe(client);
@@ -169,8 +183,11 @@ void Mode::execute( Server* server, std::string &msg , int fd)
 				{}
 				else if (option[i] == 'k')
 				{}
-				else if (option[i] == 'o')//WIP by castorga
+				else if (option[i] == 'o')//WIP by castaorga
 				{
+					std::cout << "chanName=" << channel->getChannelName() << std::endl;
+					std::cout << "param=" << param << std::endl;
+					std::cout << "sign=" << sign << std::endl;
 					optionChain << changeOperatorPrivilege(server, channel, sign, param);
 				}
 				else if (option[i] == 'l')
