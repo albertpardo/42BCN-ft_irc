@@ -186,7 +186,7 @@ void Mode::execute( Server* server, std::string &msg , int fd)
 				else if (option[i] == 'o')//WIP by castaorga
 				{
 					std::cout << "chanName=" << channel->getChannelName() << std::endl;
-					std::cout << "param=" << param << std::endl;
+					std::cout << "param=" << param << ", size=" << param.size() << std::endl;
 					std::cout << "sign=" << sign << std::endl;
 					optionChain << changeOperatorPrivilege(server, channel, sign, param);
 				}
