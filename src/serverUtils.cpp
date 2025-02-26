@@ -23,9 +23,6 @@ std::string formatIRCMessage(const std::string& message)
     return timestamp + " -!- " + message;
 }
 
-// Parse the input arguments
-//https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers#Dynamic.2C_private_or_ephemeral_ports
-
 int parseInput(std::string password, int port)
 {
     if (port < 49152 || port > 65535)
@@ -39,6 +36,18 @@ int parseInput(std::string password, int port)
         return (1);
     }
     return (0);
+}
+
+void removeAnsiCodes(std::string &str) {
+    size_t pos;
+    while ((pos = str.find("\033[")) != std::string::npos) { // "\033[" es equivalente a "\e["
+        size_t end = str.find('m', pos);  // Buscar el final del código ANSI
+        if (end != std::string::npos) {
+            str.erase(pos, end - pos + 1); // Eliminar el código ANSI
+        } else {
+            break; // Evitar bucles infinitos si no hay 'm'
+        }
+    }
 }
 
 std::string trimRight(std::string &str)
@@ -69,7 +78,7 @@ std::string uppercase(std::string &s)
 	return (s);
 }
 
-//250212 checkNickInUse can be a public function on Server class
+//checkNickInUse can be a public function on Server class
 bool checkNickInUse(std::vector<Client> clients, std::string &s)
 {
 	for (size_t i = 0; i < clients.size(); i++)
@@ -112,24 +121,6 @@ bool validateNick(std::string &s) {
     return (true);
 }
 
-// bool validateNick(std::string &s)
-// {
-// 	if (s.size() > 9 || s.size() <= 0)
-// 		return (false);
-// 	const std::string allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_[]{}\\|^";
-// 	const std::string prohibited = " &#:@!*\t";
-// 	if (!s.empty() && prohibited.find_first_of(s[0]) != std::string::npos)
-// 		return (false);
-// 	for (size_t i = 1; i < s.size(); i++)
-// 	{
-// 		if (allowedChars.find(s[i]) == std::string::npos)
-// 			return (false);//if the character is not in the allowedChars string
-// 	}
-// 	if (uppercase(s) == "NICKSERV" || uppercase(s) == "CHANSERV")
-// 		return (false);
-// 	return (true);
-// }
-
 //Function that check if the client is authenticated
 int isAuthenticated(Client* client, Server* server, int fd) {
     if (client->getHasAuth()) {
@@ -143,16 +134,15 @@ int isAuthenticated(Client* client, Server* server, int fd) {
     return (1);
 }
 
-// by apardo-m  
 void	printChannelsInfo(Server *server)
 {
 	Channel *channel;
 
-	std::cout << "========= Start Channels info === Channel Number = " << server->getChannels().size() << std::endl;
+	std::cout << "========= Start Channels info === Channel Number = " << server->getChannels().size() << std::endl;//debug
 	for (size_t i = 0; i < server->getChannels().size(); i++)
 	{
 		channel = server->getChannelsByNumPosInVector(i);
 		channel->printChannelVars();
 	}   
-	std::cout << "========= End Channels info =======\n" << std::endl;
+	std::cout << "========= End Channels info =======\n" << std::endl;//debug
 }

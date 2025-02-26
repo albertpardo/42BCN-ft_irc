@@ -26,6 +26,7 @@ std::string getCurrentTime();
 std::string formatIRCMessage(const std::string& message);
 int isAuthenticated(Client* client, Server* server, int fd);
 bool checkNickInUse(std::vector<Client> clients, std::string &s);
+bool checkUserInUse(std::vector<Client> clients, std::string &s);
 bool validateNick(std::string &s);
 void deleteRN(std::string &msg);
 int	 parseInput(std::string password, int port);
@@ -34,11 +35,9 @@ std::string trimLeft(std::string &str);
 std::string trimRight(std::string &str);
 std::string uppercase(std::string &s);
 
-// void handleSIGINT(int signal);
-// void handleSIGQUIT(int signal);
 
-bool extractParams(Server* server, std::string command, std::string &msg, int fd); // by apardo-m
-std::vector<std::string> split_msg(std::string &msg); //by apardo-m
+bool extractParams(Server* server, std::string command, std::string &msg, int fd);
+std::vector<std::string> split_msg(std::string &msg);
 void deleteRN(std::string &msg);
 int	 parseInput(std::string password, int port);
 std::vector<std::string> splitByDoublePoint(const std::string & msg);
@@ -46,5 +45,6 @@ std::string trimLeft(std::string &str);
 std::string uppercase(std::string &s);
 void printChannelsInfo(Server *server);
 std::string sanitizeInput(const std::string& msg);
+void removeAnsiCodes(std::string &str);
 
 #endif

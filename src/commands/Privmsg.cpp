@@ -6,9 +6,6 @@ Privmsg::~Privmsg( void ) {};
 /* ------------------- PUBLIC MEMBER FUNCTIONS ------------------*/
 
 
-//PRIVMSG  <target>{,<target>} <text to be sent>
-//	target can be client or Channel
-
 void Privmsg::execute( Server* server, std::string &msg , int fd)
 {
 	std::vector<std::string>	str;
@@ -16,11 +13,10 @@ void Privmsg::execute( Server* server, std::string &msg , int fd)
 	Client						*cl;
 	std::string					nick;
 	std::string					target;
+	Channel						*ch;
 
 	if (isAuthenticated(server->getClient(fd), server, fd))
 	{
-		std::cout << "    ----" << std::endl;
-		std::cout << "PRIVMSG  => WIP" << std::endl;
 		cl = server->getClientByFD(fd);
 		nick = cl->getNick();
 		deleteRN(msg);
@@ -28,20 +24,49 @@ void Privmsg::execute( Server* server, std::string &msg , int fd)
 		str = split_msg(splitedStrVect[0]);
 		if (str.size() == 1)
 		{
-			server->sendResp(ERR_NEEDMOREPARAMS(cl->getNick(), "TOPIC"), fd);  // 461  
+			server->sendResp(ERR_NEEDMOREPARAMS(nick, "PRIVMSG"), fd);  // 461 
 			return;
 		}
 		else if (str.size() > 2)
 		{
-			std::cout << "TODO : a lot of elements =" << splitedStrVect[0] << std::endl;
+			server->sendResp(FAIL_LOTPARAMS(msg), fd);
 			return;
 		}
-
-		if (splitedStrVect.size() == 2)
+		if ((str[1][0] == '#' || str[1][0] == '&'))
 		{
+			str[1] = str[1].substr(1);
+			if (!server->isInChannels(str[1])) 
+			{
+				server->sendResp(ERR_NOSUCHNICK(("#" + str[1])), fd); // 401
+				return;
+			}
+			ch = server->getChannelByChanName(str[1]);
+			if (!ch->isOpe(nick) && !ch->isMem(nick))
+			{
+				server->sendResp(ERR_USERNOTINCHANNEL(nick, str[1]), fd); // 441
+				return;
+			}
+			if (splitedStrVect.size() == 1)
+			{
+				server->sendResp(ERR_NOTEXTTOSEND(nick), fd); // 412
+				return;
+			}
+			server->sendBroadOthersInChannel(MSG_PRIVMSG_TO_CHANNEL(cl->getNick(), str[1], splitedStrVect[1]), ch, fd);
 		}
 		else
-			server->sendResp(ERR_NOTEXTTOSEND(nick), fd);
-		std::cout << "    ----\n" << std::endl;
+		{
+			str[1] = uppercase(str[1]);
+			if (!server->isInClients(str[1])) 
+			{
+				server->sendResp(ERR_NOSUCHNICK(str[1]), fd); // 401
+				return;
+			}
+			if (splitedStrVect.size() == 1)
+			{
+				server->sendResp(ERR_NOTEXTTOSEND(nick), fd);  // 412
+				return;
+			}
+			server->sendResp(MSG_PRIVMSG_TO_NICK(cl->getNick(), str[1], splitedStrVect[1]), server->getFdClientByNick(str[1]));
+		}
 	}
 }

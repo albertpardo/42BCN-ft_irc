@@ -41,7 +41,12 @@ git_commit_push.sh
 git_merge_apardo-250125.sh
 git_merge_castorga.sh
 git_merge_lin.sh
+git-script.sh
 
 #docs
 commandsForTests
-250210_heap-use-after-free.md
+250210_heap-use-after-free.md 
+250216_heap-use-after-free.md  
+250215_heap-use-after-free.md  
+250217_heap-use-after-free.md
+250217_irssi_test.md

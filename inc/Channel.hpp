@@ -6,10 +6,11 @@
 # include <iostream>
 # include <vector>
 
-// includes by Linnnnnnnnnnnnnnnn
 # include <map>
 # include "Server.hpp"
 # include "Client.hpp"
+
+# define MAX_USER_LIMIT_NUMBER 100
 
 class Client;
 
@@ -23,23 +24,14 @@ class Channel
 		std::string		_topic; 			// For Channel
 		bool			_topicRestricted;	// If True only operatos can change _topic
 
+		bool			_hasChannelKey;
 		std::string		_channelKey;//password channel
 
 		bool			_hasUserLimit;
 		int				_userLimitNumber;
-//		unsigned long	_userLimitNumber;
 		std::vector<std::pair<char, bool> > _modeOptions;
 
-/*
-// 250212 - Delete this part?????
-		std::vector<std::string>	_operators;
-		std::vector<std::string>	_memberClients;
-		std::vector<std::string>	_invitedClients;
-*/
 
-		// Added by Linnnnnnnnnnnnnnnnnn
-//		std::vector<Client> 		_clients; // including _memberClients and _invitedClients
-//		std::vector<Client> 		_operators;
 		std::map<std::string, Client *>	_memClients;
 		std::map<std::string, Client *>	_invClients;
 		std::map<std::string, Client *>	_operator;
@@ -50,42 +42,25 @@ class Channel
 		template <typename T>
 		bool	_deleteInMap(std::map<std::string, T*> &targetMap, std::string &nick);
 
-		// End Added Linnnnnnnnnnnnnnnnn
 
-/*
-// 250212 - Delete this part?????
-		template <typename T>
-		bool	_isInVector(T &t, std::string nickClient );
-
-		template <typename T>
-		bool	_addInVector(T &t, std::string nickClient );
-
-		template <typename T>
-		bool	_deleteInVector(T &t, std::string nickClient );
-*/
-/*		
-		template <typename T>
-		int		_getFdInMapSctringClient(size_t pos, T &t);
-*/
-		// For debugging
 		void	_printVectorStrings(std::vector<std::string> stringVector);
 
 		void	_printMapKeys(std::map<std::string, Client *> mapVar);
 
 	public:
 		Channel( void );
-		Channel( std::string channelName, std::string operatorNick );
-		Channel( std::string channelName, std::string operatorNick, Client *operatorClient);    // By Linnnnnnn
+		// Channel( std::string channelName, std::string operatorNick );
+		Channel( std::string channelName, std::string operatorNick, Client *operatorClient);
 		Channel( Channel const &src);
 		Channel &operator=( Channel const &src);
 		~Channel( void );
 
-		//_channelName
 		std::string		getChannelName( void ) const;
 		void			setChannelName(std::string channelName);
 
-		// to get Client with nickname in a specific channel //Added by Lin
+		// to get Client with nickname in a specific channel
 		Client			*getCliInChannel(std::string &nick);
+		Client			*getCliExceptInv(std::string &nick);
 
 		std::string 	getClientsList();
 
@@ -106,6 +81,8 @@ class Channel
 		void			unsetTopicRestricted( void );
 
 		// _channelKey
+		bool			getHasChannelKey( void ) const;
+		void			setHasChannelKey( bool flag );
 		std::string		getChannelKey( void ) const;
 		void			setChannelKey( std::string key );
 
@@ -115,32 +92,14 @@ class Channel
 		void			unsetUserLimitActived( void );
 
 		// _userLimitNumber
-//		unsigned long	getUserLimitNumber( void ) const;
 		int				getUserLimitNumber( void ) const;
-		void			setUserLimitNumber( unsigned long limit);
+		void			setUserLimitNumber( int limit);
 
 		int				getClientSum();
+		int				getOperAndMemSum( void );
 
-/*
-// 250212 - Delete this part?????
-		// _operators
-		bool 			isOperator( std::string nickClient );
-		void 			addOperator( std::string nickClient );
-		void 			deleteOperator( std::string nickClient );
-		size_t			sizeOperators( void );
 
-		// _memberClients
-		bool			isMember( std::string nickClient );
-		void			addMember( std::string nickClient );
-		void			deleteMember( std::string nickClient );
-		size_t			sizeMemberClients( void );
-
-		// _invitedClients
-		bool			isInvited( std::string nickClient );
-		void			addInvited( std::string nickClient );
-		void			deleteInvited( std::string nickClient );
-*/
-		// _operator _memClients _invClients  Added by Linnnnnnnnnnnnnnnnnnnn
+		// _operator _memClients _invClients
 		void 			addOpe(Client *client);
 		void 			deleteOpe(std::string &nick);
 		void			addMem(Client *client);
@@ -148,18 +107,15 @@ class Channel
 		void			addInv(Client *client);
 		void			deleteInv(std::string &nick);
 
-		// 250207 by apardo-m
 		bool			isOpe(std::string nick);
 		bool			isMem(std::string nick);
-		Client 			*getFirstMem( void );  // Delete???
+		Client 			*getFirstMem( void );
 		std::string		getFirstMemNick( void );
 		size_t			sizeOpe( void );
 		size_t			sizeMem( void );
-		// 250212 by apardo-m
 		bool			isInv(std::string nick);
-		Client			*getFirstOpe( void );  // For test 250213 . Delte???
+		Client			*getFirstOpe( void );
 		std::string		getFirstOpeNick( void );
-		// 250215 by apardo-m
 		std::vector<std::string>	getNicksInChannel( void );
 		int				getFdOperatorByPosInOperators(size_t pos);
 		int				getFdMemberByPosInMemClients(size_t pos);
@@ -170,6 +126,5 @@ class Channel
 };
 
 # include "Channel.tpp"
-# include "Channel1.tpp"
 
 #endif

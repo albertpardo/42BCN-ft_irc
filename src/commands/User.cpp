@@ -39,27 +39,21 @@ void User::execute(Server* server, std::string& msg, int fd)
             return;
         }
         std::string username = params[0];
-        std::string mode = params[1];   // Debe ser "0"
-        std::string unused = params[2]; // Debe ser "*"
+        std::string oldMode = params[1];   // "0"
+        std::string oldHostname = params[2]; // "*"
         std::string realname;
         std::size_t pos = msg.find(" :");
         if (pos != std::string::npos) {
             realname = msg.substr(pos + 2); // se extrae realname
-            // std::cout << "Realname------------->: " << realname << std::endl;//debug
         } else {
             server->sendResp(ERR_NEEDMOREPARAMS(std::string("*"), "USER"), fd);  // 461
             return;
         }
-/*
-        if (mode != "0" || unused != "*") {
-                server->sendResp(ERR_USERSYNTAXERROR(std::string("*"), "USER"), fd);
-            return;
-        }
-*/
-        realname = trimRight(realname);
+        realname.erase(std::remove(realname.begin(), realname.end(), '\r'), realname.end());
+        realname.erase(std::remove(realname.begin(), realname.end(), '\n'), realname.end());
         client->setUserName(username);
         client->setHasUser();
-        std::cout << YEL << "Correct user format!" << RES << std::endl;  //debug
+        std::cout << "[LOG][INFO] Correct user format!" << std::endl;  //debug
         if (client->getHasNick()) {
             server->sendResp(RPL_WELCOME(server->getServerName(), client->getNick()), fd);  // 001
             server->sendResp(RPL_YOURHOST(server->getServerName()), fd);  // 002
